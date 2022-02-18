@@ -70,7 +70,10 @@ def take_data(ctx, sources, record_length, hscale):
     sleep(1)
     device.update_header()
 
+    device.start_data_read()
+    sleep(5)
     data = device.read_data()
+
     name = ctx.obj["name"]
     fname = make_name(name)
 
@@ -93,7 +96,7 @@ def take_data(ctx, sources, record_length, hscale):
 def take_fft(ctx, channel, source, window, units, suppression):
     device = TDSXX4ADevice(ctx.obj["address"], ctx.obj["ip"], ctx.obj["timeout"])
     device.connect()
-    device.setup();
+    device.setup()
 
     # device.set_data_range(0, 100000)
     device.setup_fft(channel, source, window, units, suppression)

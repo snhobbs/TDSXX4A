@@ -85,6 +85,11 @@ class TDSXX4ADevice(PrologixGPIBEthernetDevice):
         # timeout in ms, only used when using timeout read
         self.write("++read_tmo_ms 1000")
 
+    def reset(self):
+        self.gpib.socket = socket.socket(socket.AF_INET,
+                                    socket.SOCK_STREAM,
+                                    socket.IPPROTO_TCP)
+
     def update_header(self):
         preamble = self._read_preamble()
         preamble_dict = parse_preamble(preamble)
@@ -161,7 +166,9 @@ class TDSXX4ADevice(PrologixGPIBEthernetDevice):
         Page 172
         "HORIZONTAL:MAIN:SCALE 2E-6" set the main scale to 2us per division
         '''
-        self.write(f"HORIZONTAL:MAIN:SCALE {scale}")
+        scale_str = f"{scale: .0E}"
+        print("Scale", scale_str)
+        self.write(f"HORIZONTAL:MAIN:SCALE {scale: .0E}")
 
     def set_vertical_scale(self, source: str, scale: float):
         '''
@@ -170,27 +177,49 @@ class TDSXX4ADevice(PrologixGPIBEthernetDevice):
         '''
         self.write(f"{source}:SCALE {scale}")
 
-    def read_data(self):
-        data = []
-        self.start_data_read()
-        for i in range(1):
-            sleep(0.1)
-            while True:
-                try:
-                    data.extend(self.read())
-                    sleep(0.1)
-
-                except socket.timeout as e:
-                    break
-
-                except Exception as e:
-                    print(e, i)
-                    break
-
+    def translate_data(self, d_array):
         delim=','
-        d = "".join(data).strip().strip(delim).split(delim)
-        d[0] = d[0].split(" ")[-1]
-        return [float(pt) for pt in d if len(pt.strip())]
+        d_string = "".join(d_array)
+        d_string = d_string.strip()
+        d_string = d_string.strip(":CURVE")
+        d_string = d_string.strip(delim)
+        d_string = d_string.strip("\n")
+        d_string = d_string.split("\n")[0]  #  If Two readings collide, discard the second
+        d = d_string.split(delim)
+        #d[0] = d[0].split(" ")[-1]
+        try:
+            data = np.array(d, dtype=float)#[float(pt) for pt in d if len(pt.strip())]
+        except ValueError:
+            print(d)
+            raise
+        return data
+
+    def flush(self):
+        try:
+            while True:
+                self.read()
+        except socket.timeout:
+            pass
+
+
+    def read_data(self, timeouts=3):
+        '''
+        Wait until a timeout occurs n number of times, indicating the read is finished
+        Need to delay long enough to have the next curve be sepeated by a timeout
+        '''
+        data = []
+        retry = 0
+        while retry < timeouts:
+            sleep(0.1)
+            try:
+                data.extend(self.read())
+            except socket.timeout as e:
+              retry += 1
+              continue
+            except Exception as e:
+                print(e, i)
+                break
+        return self.translate_data(data)
 
 
     def _read_preamble(self):
