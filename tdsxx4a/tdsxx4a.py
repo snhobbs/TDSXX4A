@@ -217,7 +217,7 @@ class TDSXX4ADevice(PrologixGPIBEthernetDevice):
               retry += 1
               continue
             except Exception as e:
-                print(e, i)
+                print(e, retry)
                 break
         return self.translate_data(data)
 
