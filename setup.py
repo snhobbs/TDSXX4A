@@ -19,6 +19,6 @@ setup(name='tds7xx',
       ],
       test_suite='nose.collector',
       tests_require=['nose'],
-      scripts=[],
+      scripts=["bin/tds_scope.py"],
       include_package_data=True,
       zip_safe=True)
