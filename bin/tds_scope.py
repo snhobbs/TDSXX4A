@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 from time import sleep
 import datetime
 import click
@@ -22,7 +23,7 @@ def plot(name):
 
 CONTEXT_SETTINGS = dict(
     default_map={
-        "ip":"10.231.231.129",
+        "ip":"10.231.231.128",
         "name":"TDSXX4A",
         "address":4,
         "timeout":3
@@ -46,32 +47,35 @@ def cli(ctx, ip, name, address, timeout):
 
 
 @click.option('--sources', type=str, multiple=True, default=["CH1"], help='Input channel')
-@click.option('--record_length', type=int, default=int(15e3), help='Sample Points')
-@click.option('--hscale', type=float, default=1e-6, help='Time scale per division')
+@click.option('--record_length', type=int, default=None, help='Sample Points')
+@click.option('--hscale', type=float, default=None, help='Time scale per division')
 @cli.command()
 @click.pass_context
 def take_data(ctx, sources, record_length, hscale):
     device = TDSXX4ADevice(ctx.obj["address"], ctx.obj["ip"], ctx.obj["timeout"])
-    stop = record_length+1
     device.connect()
     device.setup();
 
-    device.set_horizontal_scale(hscale)
-    sleep(1)
+    if hscale:
+        device.set_horizontal_scale(hscale)
+        sleep(1)
+
     device.set_sources(sources)
     device.update_header()
 
-    device.set_record_length(record_length)
-    sleep_time = 3e-4*record_length
+    sleep_time = 1
+    if record_length:
+        device.set_record_length(record_length)
+        sleep_time = 3e-4*record_length
+        stop = record_length+1
+        device.set_data_range(0, stop)
+
     logging.getLogger().info("Sleep Time: %0.1f", sleep_time)
     sleep(sleep_time)
 
-    device.set_data_range(0, stop)
-    sleep(1)
     device.update_header()
-
     device.start_data_read()
-    sleep(5)
+    #sleep(1)
     data = device.read_data()
 
     name = ctx.obj["name"]
@@ -119,5 +123,4 @@ def take_fft(ctx, channel, source, window, units, suppression):
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
-
     cli()
