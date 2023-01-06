@@ -1,0 +1,89 @@
+CNVRTWFM Ver 1.97
+
+Revisions since Version 1.80
+	Added Trigger Position as 3rd element of mathcad header
+	Increased mathcad output resolution
+	Port to SPARC10 and multiple platform)
+	Bug fix for vertical offset
+	Added conversion of ISF files longer than 32767 points
+	Added conversion of ISF files to mathcad with header
+	Bug fix for ISF YZERO and YOFF
+
+Description: cnvrtwfm is a utility for converting TDS file system .WFM
+	and TD 100 .ISF files to other waveform formats.  Formats generated 
+	include CURVE? response compatible binary, and ascii and generic 
+	spreadsheet mathcad and .WFM files.
+
+Normal Use: cnvrtwfm in it's default usage converts a list of .WFM files
+	to .ISF files containing a waveform preamble and a curve in 8
+	bit twos complement. Typical usage:
+
+		cnvrtwfm tek00001.wfm	-> creates tek00001.isf
+		cnvrtwfm *.wfm		-> creates *.isf (converts all wfms)
+
+Advanced Use: cnvrtwfm has a number of command line flags to facilitate
+	custom file output.  These are used on the command line with the
+	file list as follows:
+		cnvrtwfm [flags] <file list>
+	Flags:	-p	include preamble (default)
+		-p-	don't include preamble
+		-d	include waveform data (default)
+		-d-	don't include waveform data
+		-8	output 8 bit data (default)
+		-8-	output 16 bit data
+		-b	binary output format (default)
+		-b-	ascii output
+		-s	swap bytes (Intel default)
+		-s-	don't swap bytes (Motorola)
+		-i	show file info on console
+		-i-	don't show info (default)
+		-r	output raw data only (no preamble no header)
+		-r-	don't output raw data only (default)
+		-l	output spreadsheet data only (no preamble no header)
+		-l-	don't output spreadsheet format (default)
+		-m	output mathcad data only (no preamble no header no x)
+		-m-	don't output mathcad format (default)
+		-w	output wfm files (from .isf input only)
+		-w-	don't output wfm files (default)
+
+	Spreadsheet format is a list of comma separated ascii x, y pairs
+	where x is the scaled time axis (0 = trigger) and y is the scaled
+	vertical axis.  Pairs are delimited by crlf.
+
+	Mathcad data is a list of crlf separated values. If the default
+	header is selected, the first 4 values are the record length,
+	the time between samples, the trigger position in samples,
+	and the jitter of the record in samples. Jitter is expressed as a 
+	value between 0 and 1. The header is followed by the data values. 
+	If the header is dissabled via the -p- switch, only the data values 
+	are output.
+
+Output File Types:	Different output file types are labeled via file
+	extension.  The default output file extension is ".ISF". ".ISF"
+	files have a waveform preamble and binary curve data. Files in
+	spreadsheet or mathcad format are labeled ".DAT", non-spreadsheet 
+	files using ascii format are ".ASC", TDS file system compatible 
+	files ".WFM", and all other files are ".WAV".
+	
+	Examples:
+		cnvrtwfm -d- -p- -i *.wfm	-> shows file info for all
+						files and creates no output
+						files.
+
+		cnvrtwfm -l *.wfm		-> creates spreadsheet output
+						files *.dat.
+
+		cnvrtwfm -b- tek00001.wfm	-> creates ascii ouput file
+						tek00001.asc
+
+		cnvrtwfm -r -8- tek00001.wfm	-> creates output file
+						tek00001.wav which consists
+						of N 16 bit twos complement
+						values where N is the record
+						length of the .wfm file.
+
+		cnvrtwfm -w *.isf		-> creates output files *.wfm
+
+Installation:	To install cnvrtwfm copy the cnvrtwfm execuable to a directory
+	which is in your path variable.  To display your path variable type
+	path <enter> at your command prompt.
