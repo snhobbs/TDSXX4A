@@ -49,9 +49,10 @@ def cli(ctx, ip, name, address, timeout):
 @click.option('--sources', type=str, multiple=True, default=["CH1"], help='Input channel')
 @click.option('--record_length', type=int, default=None, help='Sample Points')
 @click.option('--hscale', type=float, default=None, help='Time scale per division')
+@click.option('--sleep-ms', type=float, default=0, help='Sleep time at aquisition')
 @cli.command()
 @click.pass_context
-def take_data(ctx, sources, record_length, hscale):
+def take_data(ctx, sources, record_length, hscale, sleep_ms):
     device = TDSXX4ADevice(ctx.obj["address"], ctx.obj["ip"], ctx.obj["timeout"])
     device.connect()
     device.setup();
@@ -74,8 +75,9 @@ def take_data(ctx, sources, record_length, hscale):
     sleep(sleep_time)
 
     device.update_header()
+    sleep(50e-3)
     device.start_data_read()
-    #sleep(1)
+    sleep(sleep_ms/1e3)
     data = device.read_data()
 
     name = ctx.obj["name"]

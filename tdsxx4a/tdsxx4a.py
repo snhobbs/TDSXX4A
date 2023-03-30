@@ -202,7 +202,7 @@ class TDSXX4ADevice(PrologixGPIBEthernetDevice):
             pass
 
 
-    def read_data(self, timeouts=3):
+    def read_data(self, sleep_ms=100, timeouts=3):
         '''
         Wait until a timeout occurs n number of times, indicating the read is finished
         Need to delay long enough to have the next curve be sepeated by a timeout
@@ -210,7 +210,7 @@ class TDSXX4ADevice(PrologixGPIBEthernetDevice):
         data = []
         retry = 0
         while retry < timeouts:
-            sleep(0.1)
+            sleep(sleep_ms/1000)
             try:
                 data.extend(self.read())
             except socket.timeout as e:
