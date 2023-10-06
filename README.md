@@ -59,3 +59,14 @@ tds_scope.py --address 4 --ip 10.231.231.128 --name 1s_triangular_sweep_10khz_1p
  -15360.0   
  ...
 ```
+
+
+## WFMCONVERTER
++ DOS program for reading .WFM formatted files
++ -p flag has to go after all the output settings
++ Run with dosbox:
+```bash
+ln -s [PATH]/CNVRTWFM.EXE ./  # securemode makes wine+dosbox a headache
+dosbox ./ # load local directory as C:/
+CNVRTWFM.EXE -l -b- -p [FILE] # Generate time and data in spreadsheet with header
+```
