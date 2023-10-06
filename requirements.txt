@@ -1,0 +1,6 @@
+prologix_gpib_ethernet>=0.2.0
+click
+pyserial
+numpy
+timeout_decorator
+
