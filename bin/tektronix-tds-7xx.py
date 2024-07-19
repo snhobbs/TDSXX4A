@@ -9,6 +9,8 @@ import logging
 #duration = 0.5
 #freq = 2000
 
+_log =logging.getLogger("TDS")
+
 def make_name(name):
     time_stamp = datetime.datetime.now().isoformat().replace(".", ":")
     return f"{name}_{time_stamp}"
@@ -18,7 +20,17 @@ def plot(name):
     from matplotlib import pyplot as plt
     with open(name + ".dat") as f:
         d = f.read().strip().split("\n")
-        plt.plot([float(pt) for pt in d if len(pt.strip()) and "#" not in pt])
+
+    data = []
+    for pt in d:
+        if not len(pt.strip()):
+            continue
+        try:
+            data.append(float(pt))
+        except ValueError as e:
+            _log.warning(e)
+            continue
+    plt.plot(data)
     plt.show()
 
 CONTEXT_SETTINGS = dict(
@@ -34,9 +46,14 @@ CONTEXT_SETTINGS = dict(
 @click.option('--name', type=str, required=True, help='file name')
 @click.option('--address', type=int, default=4, help='GPIB Address')
 @click.option('--timeout', type=int, default=4, help='Socket Timeout')
+@click.option('--debug', is_flag=True)
 @click.group(context_settings=CONTEXT_SETTINGS)
 @click.pass_context
-def cli(ctx, ip, name, address, timeout):
+def cli(ctx, ip, name, address, timeout, debug):
+    logging.basicConfig()
+    _log.setLevel(logging.INFO)
+    if debug:
+        _log.setLevel(logging.DEBUG)
     ctx.obj = dict(
         ip=ip,
         name=name,
