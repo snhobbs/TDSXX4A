@@ -3,4 +3,3 @@ click
 pyserial
 numpy
 timeout_decorator
-
