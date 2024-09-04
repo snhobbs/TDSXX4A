@@ -7,3 +7,5 @@ CNVRTWFM.EXE -l -p -d -i -b- NAME
 ```
 
 The -l has to go first as it it modified by the other calls. If put at the end you only get the spread sheet. Should produce a .DAT
+
+If the data has swapped bytes then the -l needs to go near the end. -p needs to be after -l to get the header/preamble.
